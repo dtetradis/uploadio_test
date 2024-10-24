@@ -81,7 +81,7 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center space-x-4 gap-2 p-4">
+    <div className="flex flex-col items-center justify-center space-x-4 gap-2 p-4 min-h-screen bg-gradient-to-r from-purple-800 via-pink-600 to-red-500 bg-cover bg-center relative overflow-hidden">
       <h2 className="text-6xl mb-8 font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600  bg-gray-100 tracking-wide">
         Uplodio Gender Test
       </h2>
@@ -90,11 +90,11 @@ function App() {
           <Button
             variant="outline"
             size="lg"
-            className="w-[150px] justify-start"
+            className="w-[200px] justify-start"
           >
             {selectedGender ? (
               <>
-                <selectedGender.icon className="mr-2 h-14 w-14 shrink-0" />
+                <selectedGender.icon className="h-14 w-14 shrink-0" />
                 {selectedGender.label}
               </>
             ) : (
@@ -104,7 +104,6 @@ function App() {
         </PopoverTrigger>
         <PopoverContent className="p-0" side="right" align="start">
           <Command>
-            {/* <CommandInput placeholder="Change status..." /> */}
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
@@ -135,16 +134,16 @@ function App() {
             </CommandList>
           </Command>
         </PopoverContent>
-      </Popover>
 
-      <Button
-        variant="default"
-        size="lg"
-        className="w-[150px] justify-start"
-        onClick={fetchUser}
-      >
-        Fetch User
-      </Button>
+        <Button
+          variant="default"
+          size="lg"
+          className="w-[150px] justify-start"
+          onClick={fetchUser}
+        >
+          Fetch User
+        </Button>
+      </Popover>
 
       <div className="min-w-96 min-h-64">
         {loading ? (
