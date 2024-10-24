@@ -1,18 +1,65 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Profile from "./components/profile";
+import IUser from "./types/user";
+import {
+  ArrowUpCircle,
+  CheckCircle2,
+  Circle,
+  HelpCircle,
+  LucideIcon,
+  XCircle,
+} from "lucide-react";
 
-interface User {
-  name: { first: string; last: string; title: string };
-  gender: string;
-  picture: { large: string; medium: string; thumbnail: string };
-  email: string;
-  title: string;
-}
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+type Status = {
+  value: string;
+  label: string;
+  icon: LucideIcon;
+};
+
+const statuses: Status[] = [
+  {
+    value: "male",
+    label: "male",
+    icon: ArrowUpCircle,
+  },
+  {
+    value: "female",
+    label: "female",
+    icon: CheckCircle2,
+  },
+  {
+    value: "",
+    label: "choose gender",
+    icon: XCircle,
+  },
+];
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [gender, setGender] = useState("");
+  const [user, setUser] = useState<IUser | null>(null);
+  // const [selectedGender, setSelectedGender] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [open, setOpen] = React.useState(false);
+  const [selectedGender, setSelectedGender] = React.useState<Status | null>(
+    null
+  );
 
   const fetchUser = async (event: any) => {
     event.preventDefault();
@@ -20,7 +67,9 @@ function App() {
 
     try {
       const response = await axios.get(
-        `http://127.0.0.1:5000/user${gender ? `?gender=${gender}` : ""}`
+        `http://127.0.0.1:5000/user${
+          selectedGender?.value ? `?gender=${selectedGender?.value}` : ""
+        }`
       );
       console.log(response);
       setUser(response.data);
@@ -32,77 +81,77 @@ function App() {
   };
 
   return (
-    <div>
-      <h2 className="text-6xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600  bg-gray-100 shadow-md tracking-wide">
-        Uplodio
+    <div className="flex flex-col items-center justify-center space-x-4 gap-2 p-4">
+      <h2 className="text-6xl mb-8 font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600  bg-gray-100 tracking-wide">
+        Uplodio Gender Test
       </h2>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-[150px] justify-start"
+          >
+            {selectedGender ? (
+              <>
+                <selectedGender.icon className="mr-2 h-14 w-14 shrink-0" />
+                {selectedGender.label}
+              </>
+            ) : (
+              <>Choose a gender</>
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="p-0" side="right" align="start">
+          <Command>
+            {/* <CommandInput placeholder="Change status..." /> */}
+            <CommandList>
+              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandGroup>
+                {statuses.map((status) => (
+                  <CommandItem
+                    key={status.value}
+                    value={status.value}
+                    onSelect={(value) => {
+                      setSelectedGender(
+                        statuses.find((priority) => priority.value === value) ||
+                          null
+                      );
+                      setOpen(false);
+                    }}
+                  >
+                    <status.icon
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        status.value === selectedGender?.value
+                          ? "opacity-100"
+                          : "opacity-40"
+                      )}
+                    />
+                    <span>{status.label}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
 
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-        <div className="max-w-md w-full bg-white shadow-md rounded-lg overflow-hidden">
-          <form onSubmit={fetchUser} className="flex flex-col items-center p-6">
-            <h2 className="text-xl font-bold mb-4">Select Gender</h2>
-            <div className="mb-4">
-              <label className="inline-flex items-center">
-                <input
-                  type="radio"
-                  name="gender"
-                  value="male"
-                  checked={gender === "male"}
-                  onChange={() => setGender("male")}
-                  className="form-radio text-blue-500"
-                />
-                <span className="ml-2">Male</span>
-              </label>
-            </div>
-            <div className="mb-4">
-              <label className="inline-flex items-center">
-                <input
-                  type="radio"
-                  name="gender"
-                  value="female"
-                  checked={gender === "female"}
-                  onChange={() => setGender("female")}
-                  className="form-radio text-pink-500"
-                />
-                <span className="ml-2">Female</span>
-              </label>
-            </div>
-            <div className="mb-4">
-              <label className="inline-flex items-center">
-                <input
-                  type="radio"
-                  name="gender"
-                  value=""
-                  checked={gender === ""}
-                  onChange={() => setGender("")}
-                  className="form-radio text-gray-500"
-                />
-                <span className="ml-2">Random (No Selection)</span>
-              </label>
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-green-500 text-white py-2 rounded"
-            >
-              Fetch User
-            </button>
-          </form>
-          {loading && <div className="p-6 text-center">Loading...</div>}
-          {user && (
-            <div className="flex flex-col justify-center items-center p-6">
-              <img
-                src={user?.picture.large}
-                alt="User Profile"
-                className="w-fit h-48 object-contain mb-4 rounded-lg shadow-lg"
-              />
-              <h2 className="text-2xl font-bold mb-2">
-                {user?.name.title} {user?.name.first} {user?.name.last}
-              </h2>
-              <p className="text-gray-700 mb-4">{user.email}</p>
-              <p className="text-gray-500">{user.gender}</p>
-            </div>
-          )}
-        </div>
+      <Button
+        variant="default"
+        size="lg"
+        className="w-[150px] justify-start"
+        onClick={fetchUser}
+      >
+        Fetch User
+      </Button>
+
+      <div className="min-w-96 min-h-64">
+        {loading ? (
+          <div className="p-6 m-10 text-center">Loading...</div>
+        ) : (
+          user && <Profile user={user} />
+        )}
       </div>
     </div>
   );
